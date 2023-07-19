@@ -1,7 +1,9 @@
-import 'package:_bloc/presentation/screens/second_screen.dart';
+import 'package:_bloc/logic/cubit/internet_cubit.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../constant/enum.dart';
 import '../../logic/cubit/counter_cubit.dart';
 
 class MyHomescreen extends StatefulWidget {
@@ -26,6 +28,18 @@ class _MyHomescreenState extends State<MyHomescreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            BlocBuilder<InternetCubit, InternetState>(
+              builder: ((BuildContext context, state) {
+                if (state is InternetConnected && state.connectionType == ConnectionType.Wifi) {
+                  return Text('wifi');
+                } else if (state is InternetConnected && state.connectionType == ConnectionType.Mobile) {
+                  return Text('Mobile');
+                } else if (state is InternetDisconnected) {
+                  return Text("Disconecnted");
+                }
+                return CircularProgressIndicator();
+              }),
+            ),
             const Text(
               'You have pushed the button this many times:',
             ),
@@ -54,13 +68,30 @@ class _MyHomescreenState extends State<MyHomescreen> {
                 );
               },
             ),
+            const SizedBox(
+              height: 24,
+            ),
+            Builder(builder: (context) {
+              // final counterState = context.watch<CounterCubit>().state;
+              // final internetState = context.watch<InternetCubit>().state;
+
+              // if (internetState is InternetConnected && internetState.connectionType == ConnectionType.Mobile) {
+              //   return Text('Counter: ${counterState.counterValue} Internet: Mobile');
+              // } else if (internetState is InternetConnected && internetState.connectionType == ConnectionType.Wifi) {
+              //   return Text('Counter: ${counterState.counterValue} Internet: Wifi');
+              // } else {
+              //   return Text('Counter: ${counterState.counterValue} Internet: Disco');
+              // }
+              final counterValue = context.select((CounterCubit cubit) => cubit.state.counterValue);
+              return Text('Counter :' + counterValue.toString());
+            }),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 FloatingActionButton(
                   heroTag: 'bnt1',
                   onPressed: () {
-                    BlocProvider.of<CounterCubit>(context).incremenet();
+                    context.read<CounterCubit>().incremenet();
                   },
                   tooltip: 'Increment',
                   child: const Icon(Icons.add),
@@ -68,7 +99,7 @@ class _MyHomescreenState extends State<MyHomescreen> {
                 FloatingActionButton(
                   heroTag: 'bnt2',
                   onPressed: () {
-                    BlocProvider.of<CounterCubit>(context).decremenet();
+                    context.read<CounterCubit>().decremenet();
                   },
                   tooltip: 'Decrement',
                   child: const Icon(Icons.remove),
